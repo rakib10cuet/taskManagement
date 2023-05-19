@@ -5,11 +5,13 @@ import { UsersModule } from 'src/users/users.module';
 import { jwtConstants } from './constants';
 import { JwtModule } from '@nestjs/jwt';
 import { RedisModule } from 'src/redis/redis.module';
+import { HelperModule } from 'src/helper/helper.module';
 // import { APP_GUARD } from '@nestjs/core';
 // import { AuthGuard } from './auth.guard';
 
 @Module({
   imports: [
+    HelperModule,
     RedisModule,
     UsersModule,
     JwtModule.register({

@@ -10,15 +10,15 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto';
+import { InsertSignUpDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
   @HttpCode(HttpStatus.OK)
   @Post('signUp')
-  async signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+  async signUp(@Body() insertSignUpDto: InsertSignUpDto) {
+    return this.authService.signUp(insertSignUpDto);
   }
 
   @Post('signIn')

@@ -1,2 +1,2 @@
 // eslint-disable-next-line prettier/prettier
-export * from './signUp.dto';
+export * from './insert-signUp.dto';

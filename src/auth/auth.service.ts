@@ -1,38 +1,62 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-// Redis Call
 import { UsersService } from '../users/users.service';
-import { SignUpDto } from './dto';
+import { InsertSignUpDto } from './dto';
 import { RedisService } from 'src/redis/redis.service';
+import { HelperService } from 'src/helper/helper.service';
+import { InjectModel } from 'nest-knexjs';
+import { Knex } from 'knex';
+// import { KnexerrorService } from 'src/knex-error/knex-error.service';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectModel() private readonly knex: Knex,
+    // private knexerrorService: KnexerrorService,
+    private helperService: HelperService,
     private redisService: RedisService,
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
-  async signUp(signUpDto: SignUpDto) {
-    const payload = {
-      id: signUpDto.id,
-      username: signUpDto.username,
-      email: signUpDto.email,
-      password: signUpDto.password,
-      contact_number: signUpDto.contact_number,
-      address: signUpDto.address,
-    };
-    await this.redisService.setRedis(
-      'user' + payload.id,
-      JSON.stringify(payload),
-    );
-    await this.redisService.setRedis(
-      'username_' + payload.username,
-      JSON.stringify(payload.id),
-    );
-    return {
-      message: 'Sucessfully Registration Complete!!!',
-      userData: payload,
-    };
+  async signUp(insertSignUpDto: InsertSignUpDto) {
+    try {
+      const payload = {
+        username: insertSignUpDto.username,
+        email: insertSignUpDto.email,
+        password: insertSignUpDto.password,
+        contact_number: insertSignUpDto.contact_number,
+        address: insertSignUpDto.address,
+        user_status: 1,
+        user_details: insertSignUpDto.user_details,
+        created_at: await this.helperService.cmnDatetime(),
+      };
+      const userId = await this.knex
+        .table('sys_users')
+        .insert(payload, 'id')
+        .then(async function (userId) {
+          return userId;
+        });
+      await this.redisService.setRedis(
+        'user' + userId,
+        JSON.stringify(payload),
+      );
+      await this.redisService.setRedis(
+        'username_' + payload.username,
+        JSON.stringify(userId),
+      );
+      return {
+        message: 'Sucessfully Registration Complete!!!',
+        userData: payload,
+        userId: userId,
+      };
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
   }
   async signIn(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(username);
