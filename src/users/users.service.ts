@@ -1,41 +1,34 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+// Redis Call
+import { RedisService } from 'src/redis/redis.service';
 
-export type User = any;
 @Injectable()
 export class UsersService {
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'Rezwoan',
-      password: '12345',
-    },
-    {
-      userId: 2,
-      username: 'Raihan',
-      password: '12345',
-    },
-  ];
-
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username);
-  }
-  async findOneById(id: number) {
-    const usersData = [
-      {
-        id: 1,
-        username: 'Rezwoan',
-        password: '12345',
-      },
-      {
-        id: 2,
-        username: 'Raihan',
-        password: '12345',
-      },
-    ];
-    const userDetails = await usersData.find((user) => user.id == id);
-    console.log(userDetails);
+  constructor(private redisService: RedisService) {}
+  async findOne(username: string) {
+    const userId = await this.redisService.getRedis('username_' + username);
+    const userDetails = JSON.parse(
+      await this.redisService.getRedis('user' + userId),
+    );
     if (userDetails === undefined) {
-      throw new HttpException(`ssss`, HttpStatus.NOT_FOUND);
+      throw new HttpException(`Data Not Found`, HttpStatus.NOT_FOUND);
+    }
+    return userDetails;
+  }
+  async findAll(limit: number, offset: number) {
+    console.log(limit, offset);
+    // const userDetails = this.users;
+    // if (userDetails === undefined && userDetails.length < 1) {
+    //   throw new HttpException(`Data Not Found`, HttpStatus.NOT_FOUND);
+    // }
+    // return userDetails;
+  }
+  async findOneById(userId: number) {
+    const userDetails = JSON.parse(
+      await this.redisService.getRedis('user' + userId),
+    );
+    if (userDetails === undefined) {
+      throw new HttpException(`Data Not Found`, HttpStatus.NOT_FOUND);
     }
     return userDetails;
   }

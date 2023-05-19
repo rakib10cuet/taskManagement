@@ -18,15 +18,15 @@ export class UsersController {
   @UseGuards(AuthGuard)
   async findAll(@Query() paginationQuery) {
     const { limit, offset } = paginationQuery;
-    return { a: 'send all data', limit, offset };
+    const user = await this.usersService.findAll(limit, offset);
+    return user;
   }
 
   @Get(':id')
-  //   @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   async findOne(@Param('id') id: number) {
-    console.log('ssssshere', id);
-    const user = await this.usersService.findOneById(id);
-    return user;
+    const user = await this.usersService.findOneById(+id);
+    return { message: 'Successfully User Retrieve!!!', data: user };
   }
 
   @Post()
