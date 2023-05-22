@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UsersService } from './users.service';
+import { InsertSignUpDto } from 'src/auth/dto';
 
 @Controller('users')
 export class UsersController {
@@ -30,8 +31,9 @@ export class UsersController {
   }
 
   @Post()
-  async create(@Body() payload) {
-    return { ...payload, time: 1 };
+  async create(@Body() insertSignUpDto: InsertSignUpDto) {
+    const data = this.usersService.create(insertSignUpDto);
+    return { message: (await data).message, data: (await data).data };
   }
 
   @Patch(':id')

@@ -18,7 +18,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('signUp')
   async signUp(@Body() insertSignUpDto: InsertSignUpDto) {
-    return this.authService.signUp(insertSignUpDto);
+    const userdata = this.authService.signUp(insertSignUpDto);
+    return userdata;
   }
 
   @Post('signIn')
