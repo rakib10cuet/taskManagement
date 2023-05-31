@@ -4,7 +4,6 @@ import { UsersService } from '../users/users.service';
 import { InsertSignUpDto } from './dto';
 import { InjectModel } from 'nest-knexjs';
 import { Knex } from 'knex';
-// import { KnexerrorService } from 'src/knex-error/knex-error.service';
 
 @Injectable()
 export class AuthService {
@@ -17,15 +16,19 @@ export class AuthService {
     const user = await this.usersService.create(insertSignUpDto);
     return user;
   }
-  async signIn(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
-    if (user?.password !== pass) {
+  async signIn(username: string, pass: string) {
+    const user = await this.usersService.findOneByName(username);
+    if (user) {
+      if (user && user.password !== pass) {
+        throw new UnauthorizedException();
+      }
+      const payload = { username: user.username, sub: user.userId };
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+        userData: user,
+      };
+    } else {
       throw new UnauthorizedException();
     }
-    const payload = { username: user.username, sub: user.userId };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-      userData: user,
-    };
   }
 }

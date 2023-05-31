@@ -24,7 +24,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   async findOne(@Param('id') id: number) {
     const user = await this.usersService.findOneById(+id);
     return { message: 'Successfully User Retrieve!!!', data: user };
