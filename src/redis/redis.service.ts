@@ -13,4 +13,10 @@ export class RedisService {
     const redis = new Redis();
     return redis.set(key, value);
   }
+
+  async updateRedis(key: string, value: string) {
+    const redis = new Redis();
+    redis.del(key);
+    return redis.set(key, value);
+  }
 }

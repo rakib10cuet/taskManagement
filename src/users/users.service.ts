@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Knex } from 'knex';
 import { InjectModel } from 'nest-knexjs';
 import { HelperService } from 'src/helper/helper.service';
@@ -160,12 +165,9 @@ export class UsersService {
           JSON.stringify(userData),
         );
       }
-      return {
-        message: 'Sucessfully Registration Complete!!!',
-        data: userData,
-      };
+      return userData;
     } catch (err) {
-      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException(err.message);
     }
   }
   // find all user data
@@ -193,26 +195,27 @@ export class UsersService {
       .catch((error) => this.knexErrorService.errorMessage(error.message));
     return userData;
   }
-
   //update user
   async update(userId: number, updateUserDto: UpdateUserDto) {
-    const payload = {
+    const userDetails = {
       ...updateUserDto,
       updated_at: await this.helperService.cmnDatetime(),
       date_of_birth: await this.helperService.cmnDatetime(
         updateUserDto.date_of_birth,
       ),
     };
-    console.log(userId);
-    await this.knex('sys_users')
-      .update(payload, 'id')
+    const success = await this.knex('sys_users')
+      .update(userDetails)
       .where('sys_users.id', userId)
       .catch((error) => this.knexErrorService.errorMessage(error.message));
-    return payload;
-    // const userDetails = this.users;
-    // if (userDetails === undefined && userDetails.length < 1) {
-    //   throw new HttpException(`Data Not Found`, HttpStatus.NOT_FOUND);
-    // }
-    // return userDetails;
+
+    if (success === undefined || success === 0) {
+      throw new NotFoundException('Data Not Found');
+    }
+    await this.redisService.updateRedis(
+      userDetailskey(userId.toString()),
+      JSON.stringify(userDetails),
+    );
+    return userDetails;
   }
 }

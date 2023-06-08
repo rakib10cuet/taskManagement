@@ -36,7 +36,6 @@ export class UsersController {
 
   @Patch(':id')
   async update(@Param('id') id: number, @Body() payload: UpdateUserDto) {
-    console.log('id', id);
     const user = await this.usersService.update(+id, payload);
     return { message: 'Successfully Updated User!!!', data: user };
   }
