@@ -4,7 +4,7 @@ import { InjectModel } from 'nest-knexjs';
 import { HelperService } from 'src/helper/helper.service';
 // Redis Call
 import { RedisService } from 'src/redis/redis.service';
-import { CreateUserDto } from './dto';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import { KnexerrorService } from 'src/knex-error/knex-error.service';
 import { userDetailskey, userIdByNamekey } from 'src/redis-keys';
 
@@ -16,6 +16,7 @@ export class UsersService {
     private knexErrorService: KnexerrorService,
     private helperService: HelperService,
   ) {}
+  // create user
   async create(insertSignUpDto: CreateUserDto) {
     try {
       const payload = {
@@ -29,6 +30,7 @@ export class UsersService {
         date_of_birth: insertSignUpDto.date_of_birth,
         gender: insertSignUpDto.gender,
         user_status: 1,
+        status: 1,
         user_details: insertSignUpDto.user_details,
         created_at: await this.helperService.cmnDatetime(),
       };
@@ -55,7 +57,7 @@ export class UsersService {
     }
   }
   //find by username
-  async getUserDataFromDB(username: string) {
+  async getUserDataFromDBByName(username: string) {
     return await this.knex('sys_users')
       .select(
         'sys_users.id',
@@ -86,7 +88,7 @@ export class UsersService {
         await this.redisService.getRedis(userDetailskey(userId.toString())),
       );
       if (!redisUserData) {
-        const userDetails = await this.getUserDataFromDB(username);
+        const userDetails = await this.getUserDataFromDBByName(username);
         await this.redisService.setRedis(
           userDetailskey(userDetails.id.toString()),
           JSON.stringify(userDetails),
@@ -95,7 +97,7 @@ export class UsersService {
       }
       return redisUserData;
     } else {
-      const userDetails = await this.getUserDataFromDB(username);
+      const userDetails = await this.getUserDataFromDBByName(username);
       if (userDetails) {
         await this.redisService.setRedis(
           userIdByNamekey(username),
@@ -109,21 +111,108 @@ export class UsersService {
       return userDetails;
     }
   }
-  async findAll(limit: number, offset: number) {
-    console.log(limit, offset);
+  async checkUniqueUserName(username: string) {
+    const userData = await this.findOneByName(username);
+    return userData ? true : false;
+  }
+  //find by User Id
+  async getUserDataFromDBById(userId: number) {
+    const userData = await this.knex('sys_users')
+      .select(
+        'sys_users.id',
+        'sys_users.usercode',
+        'sys_users.username',
+        'sys_users.email',
+        'sys_users.password',
+        'sys_users.contact_number',
+        'sys_users.primary_address',
+        'sys_users.secondary_address	',
+        'sys_users.skills',
+        'sys_users.date_of_birth',
+        'sys_users.gender',
+        'sys_users.user_image_id',
+        'sys_users.user_role_id',
+        'sys_users.user_status',
+        'sys_users.created_at',
+        'sys_users.updated_at',
+      )
+      .first()
+      .where('sys_users.id', userId)
+      .catch((error) => this.knexErrorService.errorMessage(error.message));
+    return userData;
+  }
+  async findOneById(userId: number) {
+    let userData = {};
+    try {
+      userData = JSON.parse(
+        await this.redisService.getRedis(userDetailskey(userId.toString())),
+      );
+      if (userData === undefined || userData === null) {
+        userData = await this.getUserDataFromDBById(userId);
+        if (userData === undefined || userData === null) {
+          return {
+            message: 'Data Not Found',
+            data: {},
+          };
+        }
+        await this.redisService.setRedis(
+          userDetailskey(userId.toString()),
+          JSON.stringify(userData),
+        );
+      }
+      return {
+        message: 'Sucessfully Registration Complete!!!',
+        data: userData,
+      };
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.BAD_REQUEST);
+    }
+  }
+  // find all user data
+  async findAll() {
+    const userData = await this.knex('sys_users')
+      .select(
+        'sys_users.id',
+        'sys_users.usercode',
+        'sys_users.username',
+        'sys_users.email',
+        'sys_users.password',
+        'sys_users.contact_number',
+        'sys_users.primary_address',
+        'sys_users.secondary_address	',
+        'sys_users.skills',
+        'sys_users.date_of_birth',
+        'sys_users.gender',
+        'sys_users.user_image_id',
+        'sys_users.user_role_id',
+        'sys_users.user_status',
+        'sys_users.created_at',
+        'sys_users.updated_at',
+      )
+      .orderBy('sys_users.id', 'DESC')
+      .catch((error) => this.knexErrorService.errorMessage(error.message));
+    return userData;
+  }
+
+  //update user
+  async update(userId: number, updateUserDto: UpdateUserDto) {
+    const payload = {
+      ...updateUserDto,
+      updated_at: await this.helperService.cmnDatetime(),
+      date_of_birth: await this.helperService.cmnDatetime(
+        updateUserDto.date_of_birth,
+      ),
+    };
+    console.log(userId);
+    await this.knex('sys_users')
+      .update(payload, 'id')
+      .where('sys_users.id', userId)
+      .catch((error) => this.knexErrorService.errorMessage(error.message));
+    return payload;
     // const userDetails = this.users;
     // if (userDetails === undefined && userDetails.length < 1) {
     //   throw new HttpException(`Data Not Found`, HttpStatus.NOT_FOUND);
     // }
     // return userDetails;
-  }
-  async findOneById(userId: number) {
-    const userDetails = JSON.parse(
-      await this.redisService.getRedis('user' + userId),
-    );
-    if (userDetails === undefined) {
-      throw new HttpException(`Data Not Found`, HttpStatus.NOT_FOUND);
-    }
-    return userDetails;
   }
 }

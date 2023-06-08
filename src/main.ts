@@ -22,6 +22,6 @@ async function bootstrap() {
     ();
   //enbale cors policy for production and dev
   app.enableCors();
-  await app.listen(5001);
+  await app.listen(5000);
 }
 bootstrap();

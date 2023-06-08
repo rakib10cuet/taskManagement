@@ -5,39 +5,46 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UsersService } from './users.service';
-import { InsertSignUpDto } from 'src/auth/dto';
+import { CreateUserDto, UpdateUserDto } from './dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
-  @Get()
-  @UseGuards(AuthGuard)
-  async findAll(@Query() paginationQuery) {
-    const { limit, offset } = paginationQuery;
-    const user = await this.usersService.findAll(limit, offset);
-    return user;
-  }
-
-  @Get(':id')
-  // @UseGuards(AuthGuard)
-  async findOne(@Param('id') id: number) {
-    const user = await this.usersService.findOneById(+id);
-    return { message: 'Successfully User Retrieve!!!', data: user };
-  }
 
   @Post()
-  async create(@Body() insertSignUpDto: InsertSignUpDto) {
-    const data = this.usersService.create(insertSignUpDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const data = this.usersService.create(createUserDto);
     return { message: (await data).message, data: (await data).data };
   }
 
+  @Get(':id')
+  @UseGuards(AuthGuard)
+  async findOne(@Param('id') id: number) {
+    const user = await this.usersService.findOneById(+id);
+    return { message: 'Successfully Retrieved User!!!', data: user };
+  }
+
+  @Get('checkuniqueuser/:username')
+  async checkUniqueUserName(@Param('username') username: string) {
+    const user = await this.usersService.checkUniqueUserName(username);
+    return { message: 'Check Uniqueness', data: user };
+  }
+
   @Patch(':id')
-  async update(@Param() id: number, @Body() payload) {
-    return { id, payload };
+  async update(@Param('id') id: number, @Body() payload: UpdateUserDto) {
+    console.log('id', id);
+    const user = await this.usersService.update(+id, payload);
+    return { message: 'Successfully Updated User!!!', data: user };
+  }
+
+  @Get()
+  @UseGuards(AuthGuard)
+  async findAll() {
+    const user = await this.usersService.findAll();
+    return { message: 'Retrieve All Users!!!', data: user };
   }
 }
