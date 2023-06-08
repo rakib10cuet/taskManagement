@@ -32,7 +32,23 @@ export class CreateUserDto {
 
   @Optional()
   @IsString()
-  address: string;
+  primary_address: string;
+
+  @Optional()
+  @IsString()
+  secondary_address: string;
+
+  @Optional()
+  @IsString()
+  skills: string;
+
+  @Optional()
+  @IsDate()
+  date_of_birth: Date;
+
+  @Optional()
+  @IsString()
+  gender: string;
 
   @Optional()
   @IsDate()
