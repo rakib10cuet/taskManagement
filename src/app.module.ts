@@ -7,12 +7,14 @@ import { UsersModule } from './users/users.module';
 import { RedisModule } from './redis/redis.module';
 import { HelperService } from './helper/helper.service';
 import { HelperModule } from './helper/helper.module';
+import { DropdownsModule } from './engine/dropdowns/dropdowns.module';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     RedisModule,
+    DropdownsModule,
     KnexModule.forRoot({
       config: {
         client: 'mysql',
@@ -28,6 +30,7 @@ import { HelperModule } from './helper/helper.module';
     }),
     HelperModule,
     KnexModule,
+    DropdownsModule,
   ],
   controllers: [AppController],
   providers: [AppService, HelperService],

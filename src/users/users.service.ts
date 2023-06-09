@@ -21,6 +21,7 @@ export class UsersService {
     private knexErrorService: KnexerrorService,
     private helperService: HelperService,
   ) {}
+
   // create user
   async create(insertSignUpDto: CreateUserDto) {
     try {
