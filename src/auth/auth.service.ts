@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { InsertSignUpDto } from './dto';
+import { InsertSignUpDto, SignInDto } from './dto';
 import { InjectModel } from 'nest-knexjs';
 import { Knex } from 'knex';
 
@@ -16,10 +16,10 @@ export class AuthService {
     const user = await this.usersService.create(insertSignUpDto);
     return user;
   }
-  async signIn(username: string, pass: string) {
-    const user = await this.usersService.findOneByName(username);
+  async signIn(signInDto: SignInDto) {
+    const user = await this.usersService.findOneByName(signInDto.username);
     if (user) {
-      if (user && user.password !== pass) {
+      if (user && user.password !== signInDto.password) {
         throw new UnauthorizedException();
       }
       const payload = { username: user.username, sub: user.userId };
