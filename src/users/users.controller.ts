@@ -13,7 +13,7 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('users')
-@ApiTags('User Related')
+@ApiTags('Users')
 @ApiBearerAuth('jwt')
 export class UsersController {
   constructor(private usersService: UsersService) {}
@@ -25,7 +25,7 @@ export class UsersController {
   })
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    const data = this.usersService.create(createUserDto);
+    const data = await this.usersService.create(createUserDto);
     return { message: (await data).message, data: (await data).data };
   }
 

@@ -17,7 +17,7 @@ export class AuthController {
   @Post('signUp')
   @ApiResponse({ status: 200, description: 'Success', type: InsertSignUpDto })
   async signUp(@Body() insertSignUpDto: InsertSignUpDto) {
-    const userdata = this.authService.signUp(insertSignUpDto);
+    const userdata = await this.authService.signUp(insertSignUpDto);
     return userdata;
   }
 
@@ -28,6 +28,6 @@ export class AuthController {
   })
   @Post('signIn')
   async signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto);
+    return await this.authService.signIn(signInDto);
   }
 }

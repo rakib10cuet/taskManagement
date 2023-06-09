@@ -9,6 +9,7 @@ import { HelperService } from './helper/helper.service';
 import { HelperModule } from './helper/helper.module';
 import { DropdownsModule } from './engine/dropdowns/dropdowns.module';
 import { MastergridsModule } from './engine/mastergrids/mastergrids.module';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { MastergridsModule } from './engine/mastergrids/mastergrids.module';
     UsersModule,
     RedisModule,
     DropdownsModule,
+    ImagesModule,
     KnexModule.forRoot({
       config: {
         client: 'mysql',
