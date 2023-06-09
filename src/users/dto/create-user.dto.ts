@@ -4,7 +4,7 @@ import { IsDate, IsEmail, IsInt, IsString } from 'class-validator';
 export class CreateUserDto {
   @Optional()
   @IsInt()
-  id: number;
+  sys_user_id: number;
 
   @Optional()
   @IsString()

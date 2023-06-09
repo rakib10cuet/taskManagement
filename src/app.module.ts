@@ -8,6 +8,7 @@ import { RedisModule } from './redis/redis.module';
 import { HelperService } from './helper/helper.service';
 import { HelperModule } from './helper/helper.module';
 import { DropdownsModule } from './engine/dropdowns/dropdowns.module';
+import { MastergridsModule } from './engine/mastergrids/mastergrids.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DropdownsModule } from './engine/dropdowns/dropdowns.module';
     HelperModule,
     KnexModule,
     DropdownsModule,
+    MastergridsModule,
   ],
   controllers: [AppController],
   providers: [AppService, HelperService],

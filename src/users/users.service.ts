@@ -42,7 +42,7 @@ export class UsersService {
       };
       const userId = await this.knex
         .table('sys_users')
-        .insert(payload, 'id')
+        .insert(payload, 'sys_user_id')
         .then(async function (userId) {
           return userId;
         });
@@ -66,7 +66,8 @@ export class UsersService {
   async getUserDataFromDBByName(username: string) {
     return await this.knex('sys_users')
       .select(
-        'sys_users.id',
+        'sys_users.sys_user_id',
+        'sys_users.sys_user_id AS key',
         'sys_users.usercode',
         'sys_users.username',
         'sys_users.email',
@@ -96,7 +97,7 @@ export class UsersService {
       if (!redisUserData) {
         const userDetails = await this.getUserDataFromDBByName(username);
         await this.redisService.setRedis(
-          userDetailskey(userDetails.id.toString()),
+          userDetailskey(userDetails.sys_user_id.toString()),
           JSON.stringify(userDetails),
         );
         return userDetails;
@@ -107,10 +108,10 @@ export class UsersService {
       if (userDetails) {
         await this.redisService.setRedis(
           userIdByNamekey(username),
-          JSON.stringify(userDetails.id),
+          JSON.stringify(userDetails.sys_user_id),
         );
         await this.redisService.setRedis(
-          userDetailskey(userDetails.id.toString()),
+          userDetailskey(userDetails.sys_user_id.toString()),
           JSON.stringify(userDetails),
         );
       }
@@ -125,7 +126,7 @@ export class UsersService {
   async getUserDataFromDBById(userId: number) {
     const userData = await this.knex('sys_users')
       .select(
-        'sys_users.id',
+        'sys_users.sys_user_id',
         'sys_users.usercode',
         'sys_users.username',
         'sys_users.email',
@@ -143,7 +144,7 @@ export class UsersService {
         'sys_users.updated_at',
       )
       .first()
-      .where('sys_users.id', userId)
+      .where('sys_users.sys_user_id', userId)
       .catch((error) => this.knexErrorService.errorMessage(error.message));
     return userData;
   }
@@ -175,7 +176,7 @@ export class UsersService {
   async findAll() {
     const userData = await this.knex('sys_users')
       .select(
-        'sys_users.id',
+        'sys_users.sys_user_id',
         'sys_users.usercode',
         'sys_users.username',
         'sys_users.email',
@@ -192,7 +193,7 @@ export class UsersService {
         'sys_users.created_at',
         'sys_users.updated_at',
       )
-      .orderBy('sys_users.id', 'DESC')
+      .orderBy('sys_users.sys_user_id', 'DESC')
       .catch((error) => this.knexErrorService.errorMessage(error.message));
     return userData;
   }
@@ -207,7 +208,7 @@ export class UsersService {
     };
     const success = await this.knex('sys_users')
       .update(userDetails)
-      .where('sys_users.id', userId)
+      .where('sys_users.sys_user_id', userId)
       .catch((error) => this.knexErrorService.errorMessage(error.message));
 
     if (success === undefined || success === 0) {

@@ -3,11 +3,11 @@ import { Knex } from 'knex';
 import { InjectModel } from 'nest-knexjs';
 import { HelperService } from 'src/helper/helper.service';
 import { KnexerrorService } from 'src/knex-error/knex-error.service';
-import { dropdownDataBySlug } from 'src/redis-keys';
+import { masterGridDataBySlug } from 'src/redis-keys';
 import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
-export class DropdownsService {
+export class MastergridsService {
   constructor(
     @InjectModel() private readonly knex: Knex,
     private redisService: RedisService,
@@ -15,17 +15,20 @@ export class DropdownsService {
     private helperService: HelperService,
   ) {}
   //find by Slug
-  async preparedDropdownSql(dropDownData: any) {
-    const prepared_sql = `${dropDownData.select_sql}  ${dropDownData.from_sql} ${dropDownData.condition_sql} ${dropDownData.group_sql}  ${dropDownData.order_sql}`;
+  async preparedMasterGridSql(masterGridData: any) {
+    const prepared_sql = `${masterGridData.select_sql}  ${masterGridData.from_sql} ${masterGridData.condition_sql} ${masterGridData.group_sql}  ${masterGridData.order_sql}`;
     return prepared_sql;
   }
   async findOneBySlug(slug: string) {
     try {
-      let preparedDropdownData = JSON.parse(
-        await this.redisService.getRedis(dropdownDataBySlug(slug)),
+      let preparedmasterGridData = JSON.parse(
+        await this.redisService.getRedis(masterGridDataBySlug(slug)),
       );
-      if (preparedDropdownData === undefined || preparedDropdownData === null) {
-        preparedDropdownData = await this.knex('engine_dropdowns')
+      if (
+        preparedmasterGridData === undefined ||
+        preparedmasterGridData === null
+      ) {
+        preparedmasterGridData = await this.knex('engine_dropdowns')
           .select(
             'engine_dropdowns.engine_dropdown_id',
             'engine_dropdowns.dropdown_slug',
@@ -46,24 +49,24 @@ export class DropdownsService {
           .where('engine_dropdowns.dropdown_slug', slug)
           .where('engine_dropdowns.status', 1)
           .catch((error) => this.knexErrorService.errorMessage(error.message));
-        if (preparedDropdownData) {
+        if (preparedmasterGridData) {
           await this.redisService.setRedis(
-            dropdownDataBySlug(slug),
-            JSON.stringify(preparedDropdownData),
+            masterGridDataBySlug(slug),
+            JSON.stringify(preparedmasterGridData),
           );
         }
       }
-      if (preparedDropdownData) {
-        const prepared_sql = await this.preparedDropdownSql(
-          preparedDropdownData,
+      if (preparedmasterGridData) {
+        const prepared_sql = await this.preparedMasterGridSql(
+          preparedmasterGridData,
         );
-        const dropdownData = await this.knex
+        const masterGridData = await this.knex
           .raw(`${prepared_sql}`)
           .catch((error) => this.knexErrorService.errorMessage(error.message));
         const retrieveData = [];
-        const keyColumn = preparedDropdownData.dropdown_key;
-        const valueColumn = preparedDropdownData.dropdown_value;
-        dropdownData[0].map((item) => {
+        const keyColumn = preparedmasterGridData.dropdown_key;
+        const valueColumn = preparedmasterGridData.dropdown_value;
+        masterGridData[0].map((item) => {
           retrieveData.push({
             key: item[keyColumn],
             value: item[valueColumn],
