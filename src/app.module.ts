@@ -10,6 +10,7 @@ import { HelperModule } from './helper/helper.module';
 import { DropdownsModule } from './engine/dropdowns/dropdowns.module';
 import { MastergridsModule } from './engine/mastergrids/mastergrids.module';
 import { ImagesModule } from './images/images.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ImagesModule } from './images/images.module';
     KnexModule,
     DropdownsModule,
     MastergridsModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService, HelperService],

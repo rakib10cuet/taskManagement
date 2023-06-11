@@ -53,9 +53,9 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Check unique username',
+    summary: 'Update User Data',
     description:
-      'this checkUniqueUserName api is responsible for ensuring Username Uniqueness by get request.',
+      'this update api is responsible for updating User by patch request.',
   })
   @Patch(':id')
   async update(@Param('id') id: number, @Body() payload: UpdateUserDto) {
