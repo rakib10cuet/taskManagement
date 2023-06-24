@@ -42,17 +42,6 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: 'Check unique username',
-    description:
-      'this checkUniqueUserName api is responsible for ensuring Username Uniqueness by get request.',
-  })
-  @Get('checkuniqueuser/:username')
-  async checkUniqueUserName(@Param('username') username: string) {
-    const user = await this.usersService.checkUniqueUserName(username);
-    return { message: 'Check Uniqueness', data: user };
-  }
-
-  @ApiOperation({
     summary: 'Update User Data',
     description:
       'this update api is responsible for updating User by patch request.',

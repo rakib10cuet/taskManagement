@@ -31,4 +31,8 @@ export class AuthService {
       throw new UnauthorizedException();
     }
   }
+  async checkUniqueUserName(username: string) {
+    const userData = await this.usersService.findOneByName(username);
+    return userData ? true : false;
+  }
 }

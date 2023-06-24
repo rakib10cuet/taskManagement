@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { InsertSignUpDto, SignInDto } from './dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -29,5 +29,16 @@ export class AuthController {
   @Post('signIn')
   async signIn(@Body() signInDto: SignInDto) {
     return await this.authService.signIn(signInDto);
+  }
+
+  @ApiOperation({
+    summary: 'Check unique username',
+    description:
+      'this checkUniqueUserName api is responsible for ensuring Username Uniqueness by get request.',
+  })
+  @Get('checkuniqueuser/:username')
+  async checkUniqueUserName(@Param('username') username: string) {
+    const user = await this.authService.checkUniqueUserName(username);
+    return { message: 'Check Uniqueness', data: user };
   }
 }
