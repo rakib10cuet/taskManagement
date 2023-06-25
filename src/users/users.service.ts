@@ -118,10 +118,6 @@ export class UsersService {
       return userDetails;
     }
   }
-  async checkUniqueUserName(username: string) {
-    const userData = await this.findOneByName(username);
-    return userData ? true : false;
-  }
   //find by User Id
   async getUserDataFromDBById(userId: number) {
     const userData = await this.knex('sys_users')
